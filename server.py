@@ -109,6 +109,11 @@ async def guide(_request):
 
 async def browser_asset(request):
     name = request.match_info["name"]
+    if name in {f"lan-speaker-{size}.png" for size in (16, 32, 48, 64, 128, 180, 192, 512)}:
+        return web.FileResponse(ROOT / "assets" / "icons" / name)
+    if name == "manifest.webmanifest":
+        return web.FileResponse(ROOT / "web" / name,
+                                headers={"Content-Type": "application/manifest+json", "Cache-Control": "no-cache"})
     if name not in {"i18n.js", "guide.js"}:
         raise web.HTTPNotFound()
     return web.FileResponse(ROOT / "web" / name, headers={"Cache-Control": "no-cache"})

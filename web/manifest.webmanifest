@@ -1,0 +1,14 @@
+{
+  "id": "/",
+  "name": "LAN Speaker",
+  "short_name": "LAN Speaker",
+  "start_url": "/",
+  "scope": "/",
+  "display": "browser",
+  "background_color": "#101521",
+  "theme_color": "#151b2c",
+  "icons": [
+    {"src": "/assets/lan-speaker-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "/assets/lan-speaker-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"}
+  ]
+}

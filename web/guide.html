@@ -5,11 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#151b2c">
   <title>Device setup | LAN Speaker</title>
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/lan-speaker-16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/lan-speaker-32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/assets/lan-speaker-48.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/lan-speaker-180.png">
+  <link rel="manifest" href="/assets/manifest.webmanifest">
   <style>
     :root { color-scheme: dark; font-family: system-ui, -apple-system, sans-serif; }
     body { margin: 0; background: #101521; color: #f5f7ff; }
     main { max-width: 760px; margin: auto; padding: 44px 24px 80px; }
     h1 { font-size: clamp(2rem, 5vw, 3rem); margin: 0 0 10px; }
+    .page-heading { display: flex; align-items: center; gap: 12px; }
+    .page-heading img { flex: none; width: 48px; height: 48px; }
+    .page-heading span { min-width: 0; }
     .lead { font-size: 1.16rem; color: #becae0; line-height: 1.6; margin-bottom: 30px; }
     .card { background: #1b2335; border: 1px solid #34415b; border-radius: 20px; padding: 28px; margin: 20px 0; }
     h2 { font-size: 1.25rem; margin: 0 0 18px; }
@@ -57,7 +65,7 @@
 <body>
   <main>
     <div class="language-bar"><select data-language-select aria-label="Language / 語言"><option value="en">English</option><option value="zh">繁體中文</option></select></div>
-    <h1 data-i18n="guide.heading">Play your computer's audio on another device</h1>
+    <h1 class="page-heading"><img src="/assets/lan-speaker-128.png" width="48" height="48" alt=""><span data-i18n="guide.heading">Play your computer's audio on another device</span></h1>
     <p class="lead" data-i18n="guide.lead">The computer server is running. Follow these three steps to listen on a phone, tablet, or another computer.</p>
 
     <section class="card">
