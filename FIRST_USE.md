@@ -9,7 +9,7 @@ The **Windows computer is the server**. It copies its current default audio outp
 - A working default audio output. Confirm the computer plays sound normally first.
 - Python 3.10 or later. Run `python --version` in PowerShell; it should show a version rather than an error or an installation-store window.
 - Internet access on the first run to install `aiohttp`, `numpy`, and `SoundCard` from `requirements.txt`. Missing packages on later runs may also require internet access.
-- A writable program folder. Keep `start.bat`, `launcher.py`, `localization.py`, `server.py`, `config.json`, `requirements.txt`, and the complete `web` folder together. The launcher creates `.venv` locally; do not transfer an existing `.venv` from another computer.
+- A writable program folder. Keep `start.bat`, `launcher.py`, `localization.py`, `server.py`, `config.json`, `requirements.txt`, the complete `web` folder, and runtime icons in `assets/icons` together. The launcher creates `.venv` locally; do not transfer an existing `.venv` from another computer.
 - An available TCP port. The default in `config.json` is `38471`. Choose an unused port if it conflicts with another service, and update the firewall rule accordingly.
 - Access to a computer administrator if an incoming firewall rule is needed. Allow only the current TCP port from `LocalSubnet`. Do not turn off the entire firewall.
 

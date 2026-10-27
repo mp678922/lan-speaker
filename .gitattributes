@@ -16,3 +16,12 @@
 /.gitattributes export-ignore
 /.gitignore export-ignore
 /docs export-ignore
+
+# Icon source material and sizes not used by the application.
+/assets/lan-speaker-icon.png export-ignore
+/assets/lan-speaker-icon.prompt.txt export-ignore
+/assets/lan-speaker-icons.zip export-ignore
+/assets/icons/lan-speaker-24.png export-ignore
+/assets/icons/lan-speaker-96.png export-ignore
+/assets/icons/lan-speaker-256.png export-ignore
+/assets/icons/lan-speaker-1024.png export-ignore

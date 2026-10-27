@@ -4,7 +4,7 @@
 
 將 Windows 電腦正在播放的聲音，透過區網傳到手機、平板或另一台電腦的瀏覽器。接收端不用安裝專用 App；電腦原本的聲音會保留，也不會擷取麥克風。
 
-從[最新正式版](https://github.com/mp678922/lan-speaker/releases/latest)下載 **lan-speaker-v1.0.0.zip**，完整解壓縮後再執行 `start.bat`。也可用 **Code → Download ZIP** 取得目前 main 分支；此來源 ZIP 會依 `.gitattributes` 排除開發測試與 Git 設定檔，`git clone` 仍會包含測試。虛擬環境、快取與暫存檔則由 `.gitignore` 排除上傳。
+從[最新正式版](https://github.com/mp678922/lan-speaker/releases/latest)下載 **lan-speaker-v1.0.1.zip**，完整解壓縮後再執行 `start.bat`。也可用 **Code → Download ZIP** 取得目前 main 分支；此來源 ZIP 會依 `.gitattributes` 排除開發測試與 Git 設定檔，`git clone` 仍會包含測試。虛擬環境、快取與暫存檔則由 `.gitignore` 排除上傳。
 
 ## 播放畫面
 
@@ -29,7 +29,7 @@
 | 區網 | 兩台裝置必須能互連；電腦接有線、接收端用 Wi-Fi 也可以。訪客網路、VPN 或路由器的裝置隔離可能阻擋連線。 |
 | 防火牆權限 | 如需新增輸入規則，請電腦管理員協助，只開放目前 TCP port 與同一區網來源（`LocalSubnet`）。 |
 
-分享程式時保留 `start.bat`、`launcher.py`、`localization.py`、`server.py`、`config.json`、`requirements.txt` 和完整 `web` 資料夾，並附上使用文件。不要把另一台電腦的 `.venv` 一起複製；新電腦首次啟動會自行建立。
+分享程式時保留 `start.bat`、`launcher.py`、`localization.py`、`server.py`、`config.json`、`requirements.txt`、完整 `web` 資料夾與 `assets/icons` 中的執行用圖示，並附上使用文件。不要把另一台電腦的 `.venv` 一起複製；新電腦首次啟動會自行建立。
 
 ## 啟動與播放
 
