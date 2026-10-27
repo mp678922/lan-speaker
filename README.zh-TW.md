@@ -4,7 +4,7 @@
 
 將 Windows 電腦正在播放的聲音，透過區網傳到手機、平板或另一台電腦的瀏覽器。接收端不用安裝專用 App；電腦原本的聲音會保留，也不會擷取麥克風。
 
-從[最新正式版](https://github.com/mp678922/lan-speaker/releases/latest)下載 **lan-speaker-v1.0.1.zip**，完整解壓縮後再執行 `start.bat`。也可用 **Code → Download ZIP** 取得目前 main 分支；此來源 ZIP 會依 `.gitattributes` 排除開發測試與 Git 設定檔，`git clone` 仍會包含測試。虛擬環境、快取與暫存檔則由 `.gitignore` 排除上傳。
+從[最新正式版](https://github.com/mp678922/lan-speaker/releases/latest)下載 **lan-speaker-v1.0.2.zip**，完整解壓縮後再執行 `start.bat`。也可用 **Code → Download ZIP** 取得目前 main 分支；此來源 ZIP 會依 `.gitattributes` 排除開發測試與 Git 設定檔，`git clone` 仍會包含測試。虛擬環境、快取與暫存檔則由 `.gitignore` 排除上傳。
 
 ## 播放畫面
 

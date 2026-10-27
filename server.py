@@ -18,6 +18,7 @@ APP_ID = "lan-speaker-v1"
 ROOT = Path(__file__).resolve().parent
 RATE = 48000
 FRAMES = 1920  # 40 ms packets
+CAPTURE_BUFFER_FRAMES = FRAMES * 3  # 120 ms capture capacity; keep reads at 40 ms.
 
 
 class AudioHub:
@@ -62,7 +63,7 @@ class AudioHub:
                 microphone = sc.get_microphone(speaker.id, include_loopback=True)
                 if microphone is None:
                     raise RuntimeError(f"No loopback capture for {speaker.name}")
-                with microphone.recorder(samplerate=RATE, channels=2, blocksize=FRAMES) as recorder:
+                with microphone.recorder(samplerate=RATE, channels=2, blocksize=CAPTURE_BUFFER_FRAMES) as recorder:
                     self.loop.call_soon_threadsafe(self.set_capture_status, speaker.name, "")
                     while not self.stop.is_set():
                         samples = recorder.record(numframes=FRAMES)

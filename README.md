@@ -12,7 +12,7 @@ Captured from the actual player while streaming a short demo audio clip.
 
 ## Before you start
 
-Download **lan-speaker-v1.0.1.zip** from the [latest release](https://github.com/mp678922/lan-speaker/releases/latest), then extract the entire ZIP before running `start.bat`. Read [First-time setup](FIRST_USE.md). Keep the extracted files, `web`, and `assets` folders together; the launcher creates `.venv` on the first run. You can also use **Code → Download ZIP** for the current main branch.
+Download **lan-speaker-v1.0.2.zip** from the [latest release](https://github.com/mp678922/lan-speaker/releases/latest), then extract the entire ZIP before running `start.bat`. Read [First-time setup](FIRST_USE.md). Keep the extracted files, `web`, and `assets` folders together; the launcher creates `.venv` on the first run. You can also use **Code → Download ZIP** for the current main branch.
 
 Source ZIP downloads omit development tests and Git configuration through `.gitattributes`. A Git clone includes the tests for development. Python virtual environments, caches, and temporary files are excluded from version control by `.gitignore`.
 
