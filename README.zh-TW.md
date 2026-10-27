@@ -6,6 +6,18 @@
 
 從[最新正式版](https://github.com/mp678922/lan-speaker/releases/latest)下載 **lan-speaker-v1.0.0.zip**，完整解壓縮後再執行 `start.bat`。也可用 **Code → Download ZIP** 取得目前 main 分支；此來源 ZIP 會依 `.gitattributes` 排除開發測試與 Git 設定檔，`git clone` 仍會包含測試。虛擬環境、快取與暫存檔則由 `.gitignore` 排除上傳。
 
+## 播放畫面
+
+以下為實際播放頁串流一小段示範音訊時的截圖。
+
+**繁體中文**
+
+![區網喇叭繁體中文播放畫面，顯示即時頻譜與音量控制](https://raw.githubusercontent.com/mp678922/lan-speaker/main/docs/screenshots/player-zh-TW.jpg)
+
+**English / 英文**
+
+![區網喇叭英文播放畫面，顯示即時頻譜與音量控制](https://raw.githubusercontent.com/mp678922/lan-speaker/main/docs/screenshots/player-en.jpg)
+
 ## 首次使用準備
 
 | 項目 | 需要準備 |

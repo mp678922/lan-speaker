@@ -4,6 +4,18 @@
 
 Copy the audio currently playing on a Windows computer to a phone, tablet, or another computer on the same local network. The receiving device uses a browser; the Windows computer keeps playing its own audio.
 
+## Player screenshots
+
+Captured from the actual player while streaming a short demo audio clip.
+
+**English**
+
+![LAN Speaker playing audio in English, with a live spectrum and volume control](https://raw.githubusercontent.com/mp678922/lan-speaker/main/docs/screenshots/player-en.jpg)
+
+**繁體中文 / Traditional Chinese**
+
+![LAN Speaker playing audio in Traditional Chinese, with a live spectrum and volume control](https://raw.githubusercontent.com/mp678922/lan-speaker/main/docs/screenshots/player-zh-TW.jpg)
+
 ## Before you start
 
 Download **lan-speaker-v1.0.0.zip** from the [latest release](https://github.com/mp678922/lan-speaker/releases/latest), then extract the entire ZIP before running `start.bat`. Read [First-time setup](FIRST_USE.md). Keep the extracted files and `web` folder together; the launcher creates `.venv` on the first run. You can also use **Code → Download ZIP** for the current main branch.
