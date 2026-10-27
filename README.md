@@ -4,17 +4,11 @@
 
 Copy the audio currently playing on a Windows computer to a phone, tablet, or another computer on the same local network. The receiving device uses a browser; the Windows computer keeps playing its own audio.
 
-## Player screenshots
+## Player screenshot
 
 Captured from the actual player while streaming a short demo audio clip.
 
-**English**
-
 ![LAN Speaker playing audio in English, with a live spectrum and volume control](https://raw.githubusercontent.com/mp678922/lan-speaker/main/docs/screenshots/player-en.jpg)
-
-**繁體中文 / Traditional Chinese**
-
-![LAN Speaker playing audio in Traditional Chinese, with a live spectrum and volume control](https://raw.githubusercontent.com/mp678922/lan-speaker/main/docs/screenshots/player-zh-TW.jpg)
 
 ## Before you start
 

@@ -10,13 +10,7 @@
 
 以下為實際播放頁串流一小段示範音訊時的截圖。
 
-**繁體中文**
-
 ![區網喇叭繁體中文播放畫面，顯示即時頻譜與音量控制](https://raw.githubusercontent.com/mp678922/lan-speaker/main/docs/screenshots/player-zh-TW.jpg)
-
-**English / 英文**
-
-![區網喇叭英文播放畫面，顯示即時頻譜與音量控制](https://raw.githubusercontent.com/mp678922/lan-speaker/main/docs/screenshots/player-en.jpg)
 
 ## 首次使用準備
 
