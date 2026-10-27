@@ -1,12 +1,12 @@
 # LAN Speaker
 
-[繁體中文說明](README.zh-TW.md)
+[Download latest release](https://github.com/mp678922/lan-speaker/releases/latest) · [繁體中文說明](README.zh-TW.md)
 
 Copy the audio currently playing on a Windows computer to a phone, tablet, or another computer on the same local network. The receiving device uses a browser; the Windows computer keeps playing its own audio.
 
 ## Before you start
 
-On GitHub, click **Code → Download ZIP**, then extract the entire ZIP before running `start.bat`. Read [First-time setup](FIRST_USE.md). Keep the extracted files and `web` folder together; the launcher creates `.venv` on the first run.
+Download **lan-speaker-v1.0.0.zip** from the [latest release](https://github.com/mp678922/lan-speaker/releases/latest), then extract the entire ZIP before running `start.bat`. Read [First-time setup](FIRST_USE.md). Keep the extracted files and `web` folder together; the launcher creates `.venv` on the first run. You can also use **Code → Download ZIP** for the current main branch.
 
 Source ZIP downloads omit development tests and Git configuration through `.gitattributes`. A Git clone includes the tests for development. Python virtual environments, caches, and temporary files are excluded from version control by `.gitignore`.
 
