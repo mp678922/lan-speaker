@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en" data-page-title="guide.title">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#151b2c">
+  <title>Device setup | LAN Speaker</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, -apple-system, sans-serif; }
+    body { margin: 0; background: #101521; color: #f5f7ff; }
+    main { max-width: 760px; margin: auto; padding: 44px 24px 80px; }
+    h1 { font-size: clamp(2rem, 5vw, 3rem); margin: 0 0 10px; }
+    .lead { font-size: 1.16rem; color: #becae0; line-height: 1.6; margin-bottom: 30px; }
+    .card { background: #1b2335; border: 1px solid #34415b; border-radius: 20px; padding: 28px; margin: 20px 0; }
+    h2 { font-size: 1.25rem; margin: 0 0 18px; }
+    ol { margin: 0; padding-left: 1.65em; }
+    li { padding: 0 0 14px 4px; line-height: 1.6; }
+    li:last-child { padding-bottom: 0; }
+    .url { display: block; color: #a9d0ff; font-size: clamp(1.2rem, 3.5vw, 1.7rem); font-weight: 700; overflow-wrap: anywhere; margin: 10px 0; }
+    button { background: #7db0ff; color: #081426; border: 0; border-radius: 12px; padding: 13px 20px; min-height: 48px; font-size: 1rem; font-weight: 700; cursor: pointer; }
+    .hint { color: #aebbd2; line-height: 1.5; }
+    .status { display: flex; align-items: center; gap: 10px; font-weight: 650; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: #f5b84b; flex: none; }
+    .dot.ready { background: #52d89b; }
+    .dot.error { background: #ff7272; }
+    #otherUrls { margin: 12px 0 0; padding-left: 1.2em; }
+    #otherUrls li { padding-bottom: 4px; }
+    #otherUrls a { color: #a9d0ff; }
+    details { border-top: 1px solid #34415b; padding: 16px 0; }
+    summary { cursor: pointer; font-size: 1.08rem; font-weight: 700; line-height: 1.5; }
+    details p { color: #c6d1e5; }
+    code { overflow-wrap: anywhere; }
+    .minor { font-size: .94rem; }
+    .prereqs { margin: 0; padding-left: 1.4em; }
+    .troubleshooting > summary { font-size: 1.25rem; }
+    .troubleshooting > summary::after { content: attr(data-expand-label); float: right; color: #aebbd2; font-size: .88rem; font-weight: 500; }
+    .troubleshooting[open] > summary::after { content: attr(data-collapse-label); }
+    .troubleshooting > summary:focus-visible { outline: 2px solid #a9d0ff; outline-offset: 5px; border-radius: 4px; }
+    .troubleshooting-body { margin-top: 18px; }
+    .scenario { border-top: 1px solid #34415b; padding: 18px 0; }
+    .scenario h3 { margin: 0 0 8px; font-size: 1.08rem; }
+    .scenario p { margin: 0 0 14px; line-height: 1.5; }
+    .prompt-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+    .prompt-actions a { display: inline-flex; align-items: center; min-height: 48px; padding: 0 16px; border: 1px solid #7db0ff; border-radius: 12px; color: #b8d8ff; font-weight: 700; text-decoration: none; }
+    .prompt-actions a:hover, .prompt-actions a:focus-visible { background: #243754; }
+    @media (max-width: 520px) {
+      main { padding: 28px 16px 56px; }
+      .card { padding: 20px; }
+      .prompt-actions a { box-sizing: border-box; width: 100%; padding: 12px 16px; line-height: 1.4; }
+    }
+
+    .language-bar { display: flex; justify-content: flex-end; margin-bottom: 20px; }
+    .language-bar select { max-width: 100%; min-height: 44px; padding: 8px 12px; border: 1px solid #51658a; border-radius: 10px; background: #1b2335; color: #f5f7ff; font: inherit; }
+    .language-bar select:focus-visible { outline: 2px solid #a9d0ff; outline-offset: 3px; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="language-bar"><select data-language-select aria-label="Language / 語言"><option value="en">English</option><option value="zh">繁體中文</option></select></div>
+    <h1 data-i18n="guide.heading">Play your computer's audio on another device</h1>
+    <p class="lead" data-i18n="guide.lead">The computer server is running. Follow these three steps to listen on a phone, tablet, or another computer.</p>
+
+    <section class="card">
+      <h2 data-i18n="guide.prepHeading">First-time setup checklist</h2>
+      <ul class="prereqs">
+        <li data-i18n="guide.prepServer">The Windows computer hosts the server. It needs Python 3.10 or later, a working default audio output, and a writable program folder. Internet access is needed to install packages on the first run.</li>
+        <li data-i18n="guide.prepBrowser">Double-click start.bat in File Explorer and keep its window open. The receiving device needs a browser with Web Audio and WebSocket support, and a local network connection to the computer.</li>
+        <li data-i18n="guide.prepFirewall">If the receiving device times out, a computer administrator may need to allow incoming LAN connections to the current TCP port. The troubleshooting buttons below can help you ask ChatGPT for guidance.</li>
+        <li data-i18n="guide.prepSecurity">This website has no sign-in or encryption. Use a trusted local network and do not forward its port to the internet. See FIRST_USE.md in the program folder for the full checklist.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2 data-i18n="guide.receiverHeading">On the receiving device</h2>
+      <ol>
+        <li data-i18n="guide.stepNetwork">Connect your phone, tablet, or other computer to a local network that can reach this computer.</li>
+        <li data-i18n="guide.stepBrowser">Open a browser on that device and enter this address:</li>
+      </ol>
+      <a id="receiverUrl" class="url" href="#" data-i18n="guide.loadingAddress">Finding local network addresses…</a>
+      <button id="copy" type="button" data-i18n="guide.copy">Copy address</button>
+      <ul id="otherUrls" hidden></ul>
+      <ol start="3" style="margin-top: 22px"><li data-i18n="guide.stepPlay">Click Start playback on the player page, keep it open, and adjust the device and page volume.</li></ol>
+    </section>
+
+    <section class="card">
+      <h2 data-i18n="guide.audioHeading">Computer audio status</h2>
+      <div class="status"><span id="dot" class="dot"></span><span id="status" data-i18n="guide.checkingAudio">Checking the audio source…</span></div>
+      <p class="hint" data-i18n="guide.audioNote">The computer's own audio continues playing. You may hear an echo if both devices are audible.</p>
+    </section>
+
+    <details class="card troubleshooting" id="troubleshooting">
+      <summary data-i18n="guide.faq" data-i18n-expanded data-expand-label="Expand" data-collapse-label="Collapse">Troubleshooting</summary>
+      <div class="troubleshooting-body">
+        <p class="hint" data-i18n="guide.faqIntro">First open the player address above on the computer, then choose the matching situation. This page collects local network and firewall information to include in your question to ChatGPT.</p>
+        <p id="diagnosticsStatus" class="hint minor" role="status" data-i18n="diag.loading">Reading local diagnostics…</p>
+        <div class="scenario">
+          <h3 data-i18n="guide.timeoutHeading">The receiving device cannot open the player page</h3>
+          <p data-i18n="guide.timeoutHint">Try the player address on the computer first, then choose the result below.</p>
+          <div class="prompt-actions">
+            <a href="https://chatgpt.com/" data-support-case="receiver-timeout" target="_blank" rel="noopener noreferrer" data-i18n="guide.receiverTimeout">Computer opens it; receiving device times out ↗</a>
+            <a href="https://chatgpt.com/" data-support-case="both-timeout" target="_blank" rel="noopener noreferrer" data-i18n="guide.bothTimeout">Neither device can open it ↗</a>
+          </div>
+        </div>
+        <div class="scenario">
+          <h3 data-i18n="guide.noSoundHeading">The player opens, but the receiving device has no sound</h3>
+          <div class="prompt-actions">
+            <a href="https://chatgpt.com/" data-support-case="no-sound" target="_blank" rel="noopener noreferrer" data-i18n="guide.noSound">Ask ChatGPT about missing audio ↗</a>
+          </div>
+        </div>
+        <p class="hint minor" data-i18n="guide.disclosure">ChatGPT provides written guidance and cannot inspect or change your devices. Clicking a button sends diagnostic information in the ChatGPT URL, which may include local IP addresses, program paths, network profiles, and firewall rules. Review and send the conversation yourself.</p>
+      </div>
+    </details>
+
+    <p class="hint" data-i18n="guide.footer">Close the BAT window or press Ctrl+C there to stop the server. This website has no sign-in; use it only on a trusted local network. For offline instructions, see USER_GUIDE.md in the program folder.</p>
+  </main>
+  <script src="/assets/i18n.js"></script>
+  <script src="/assets/guide.js"></script>
+</body>
+</html>

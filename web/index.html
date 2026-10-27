@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en" data-page-title="player.title">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#151b2c">
+  <title>LAN Speaker</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, -apple-system, sans-serif; }
+    body { margin: 0; min-height: 100dvh; display: grid; place-items: center; background: radial-gradient(ellipse at 50% 15%, #1c2750 0, #101521 55%); color: #f5f7ff; }
+    main { box-sizing: border-box; width: min(100%, 600px); padding: max(32px, env(safe-area-inset-top)) 24px max(32px, env(safe-area-inset-bottom)); }
+    h1 { font-size: 2rem; margin: 0 0 8px; }
+    p { line-height: 1.5; color: #b8c3d9; }
+    .card { background: #1b2335; border: 1px solid #34415b; border-radius: 22px; padding: 28px; box-shadow: 0 20px 70px #0004; }
+    .state { display: flex; align-items: center; gap: 10px; min-height: 32px; font-weight: 650; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: #f5b84b; }
+    .dot.playing { background: #52d89b; }
+    .dot.error { background: #ff7272; }
+    .visualizer { position: relative; overflow: hidden; margin-top: 20px; border: 1px solid #3c4b70; border-radius: 18px; background: #0a1022; box-shadow: inset 0 0 35px #3758aa20, 0 0 28px #7058ff18; }
+    .visualizer::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 100%, #6e42d524, transparent 65%); }
+    canvas { display: block; width: 100%; height: 200px; }
+    .visualizer-caption { position: absolute; left: 16px; right: 16px; bottom: 10px; display: flex; justify-content: space-between; color: #aab8d8; font-size: .68rem; font-weight: 750; letter-spacing: .15em; pointer-events: none; }
+    button { border: 0; border-radius: 14px; min-height: 56px; width: 100%; background: #7db0ff; color: #081426; font-size: 1.1rem; font-weight: 750; margin-top: 22px; cursor: pointer; }
+    button:disabled { opacity: .55; cursor: wait; }
+    .volume { display: flex; align-items: center; gap: 16px; margin-top: 28px; }
+    .volume label { min-width: 44px; }
+    input[type=range] { flex: 1; min-width: 0; height: 36px; }
+    small { display: block; min-height: 1.5em; color: #aab8d3; margin-top: 18px; overflow-wrap: anywhere; }
+    @media (max-width: 480px) { .card { padding: 20px; } canvas { height: 170px; } }
+
+    .language-bar { display: flex; justify-content: flex-end; margin-bottom: 20px; }
+    .language-bar select { max-width: 100%; min-height: 44px; padding: 8px 12px; border: 1px solid #51658a; border-radius: 10px; background: #1b2335; color: #f5f7ff; font: inherit; }
+    .language-bar select:focus-visible { outline: 2px solid #a9d0ff; outline-offset: 3px; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="language-bar"><select data-language-select aria-label="Language / 語言"><option value="en">English</option><option value="zh">繁體中文</option></select></div>
+    <h1 data-i18n="player.title">LAN Speaker</h1>
+    <p data-i18n="player.intro">Play this computer's audio. Keep this page open and adjust both your device volume and the volume below.</p>
+    <div class="card">
+      <div class="state"><span class="dot" id="dot"></span><span id="state" data-i18n="player.idle">Not playing</span></div>
+      <div class="visualizer" role="img" aria-label="Audio-driven spectrum animation" data-i18n-aria="player.visualizer">
+        <canvas id="spectrum"></canvas>
+        <div class="visualizer-caption"><span data-i18n="player.spectrum">LIVE SPECTRUM</span><span id="vizMode" data-i18n="player.standby">STANDBY</span></div>
+      </div>
+      <button id="toggle" data-i18n="player.start">Start playback</button>
+      <div class="volume"><label for="volume" data-i18n="player.volume">Volume</label><input id="volume" type="range" min="0" max="100" value="100"><span id="volumeText">100%</span></div>
+      <small id="detail" data-i18n="player.first">Click Start playback to begin.</small>
+    </div>
+  </main>
+  <script src="/assets/i18n.js"></script>
+  <script>
+    const {t} = I18n;
+    const toggle = document.getElementById('toggle');
+    const state = document.getElementById('state');
+    const detail = document.getElementById('detail');
+    const dot = document.getElementById('dot');
+    const volume = document.getElementById('volume');
+    const volumeText = document.getElementById('volumeText');
+    const canvas = document.getElementById('spectrum');
+    const painter = canvas.getContext('2d', {alpha: false});
+    const vizMode = document.getElementById('vizMode');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const barCount = 36;
+    const levels = new Float32Array(barCount);
+    let context, gain, analyser, frequencies, socket, wanted = false, retryTimer, nextTime = 0, received = false;
+    let lastPacketAt = 0;
+    let animationId = 0, lastDraw = 0, lastBass = 0, sparks = [];
+
+    function resizeVisualizer() {
+      const bounds = canvas.getBoundingClientRect();
+      const ratio = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.max(1, Math.round(bounds.width * ratio));
+      canvas.height = Math.max(1, Math.round(bounds.height * ratio));
+      painter.setTransform(ratio, 0, 0, ratio, 0, 0);
+      if (!animationId) drawVisualizer(false);
+    }
+
+    function drawVisualizer(active) {
+      const width = canvas.clientWidth, height = canvas.clientHeight;
+      const floor = height - 32;
+      painter.clearRect(0, 0, width, height);
+      painter.fillStyle = '#0a1022';
+      painter.fillRect(0, 0, width, height);
+
+      let bass = 0;
+      if (active && analyser) {
+        analyser.getByteFrequencyData(frequencies);
+        const nyquist = context.sampleRate / 2;
+        for (let i = 0; i < barCount; i++) {
+          const lowHz = 55 * Math.pow(16000 / 55, i / barCount);
+          const highHz = 55 * Math.pow(16000 / 55, (i + 1) / barCount);
+          const first = Math.max(1, Math.floor(lowHz / nyquist * frequencies.length));
+          const last = Math.max(first + 1, Math.ceil(highHz / nyquist * frequencies.length));
+          let peak = 0;
+          for (let bin = first; bin < Math.min(last, frequencies.length); bin++) peak = Math.max(peak, frequencies[bin]);
+          const target = Math.pow(peak / 255, 1.35);
+          levels[i] += (target - levels[i]) * (target > levels[i] ? .48 : .18);
+        }
+        bass = (levels[1] + levels[2] + levels[3] + levels[4] + levels[5]) / 5;
+      }
+
+      const halo = painter.createRadialGradient(width / 2, floor, 5, width / 2, floor, width * .7);
+      halo.addColorStop(0, `rgba(98, 75, 237, ${active ? .15 + bass * .36 : .12})`);
+      halo.addColorStop(.5, `rgba(16, 135, 235, ${active ? .05 + bass * .13 : .04})`);
+      halo.addColorStop(1, 'rgba(10, 16, 34, 0)');
+      painter.fillStyle = halo;
+      painter.fillRect(0, 0, width, height);
+
+      painter.strokeStyle = '#8cafff13';
+      painter.lineWidth = 1;
+      for (let y = floor - 38; y > 10; y -= 38) {
+        painter.beginPath(); painter.moveTo(12, y + .5); painter.lineTo(width - 12, y + .5); painter.stroke();
+      }
+      painter.strokeStyle = '#6fdcff55';
+      painter.beginPath(); painter.moveTo(12, floor + 3); painter.lineTo(width - 12, floor + 3); painter.stroke();
+
+      const gap = Math.max(3, width * .008);
+      const barWidth = (width - 28 - gap * (barCount - 1)) / barCount;
+      for (let i = 0; i < barCount; i++) {
+        const x = 14 + i * (barWidth + gap);
+        const barHeight = active ? Math.max(3, levels[i] * (floor - 22)) : 3;
+        const hue = 189 + i / (barCount - 1) * 91;
+        painter.fillStyle = `hsla(${hue}, 100%, 64%, ${active ? .23 + levels[i] * .33 : .24})`;
+        painter.shadowColor = `hsla(${hue}, 100%, 65%, .85)`;
+        painter.shadowBlur = active ? 12 + levels[i] * 22 : 5;
+        painter.fillRect(x, floor - barHeight, barWidth, barHeight);
+        painter.shadowBlur = 0;
+        painter.fillStyle = `hsla(${hue}, 100%, 79%, ${active ? .65 + levels[i] * .35 : .4})`;
+        painter.fillRect(x, floor - barHeight, barWidth, Math.max(2, barHeight * .14));
+      }
+
+      if (active && !reducedMotion.matches) {
+        const beat = bass - lastBass;
+        const energy = levels.reduce((sum, value) => sum + value, 0) / barCount;
+        if (energy > .08 && sparks.length < 55) {
+          const count = beat > .035 ? Math.min(7, Math.ceil(beat * 32)) : Math.random() < energy * .8 ? 1 : 0;
+          for (let i = 0; i < count; i++) {
+            sparks.push({x: width * (.2 + Math.random() * .6), y: floor - 12 - Math.random() * energy * 110,
+                         vx: (Math.random() - .5) * 2.6, vy: -(.8 + Math.random() * 2.4),
+                         life: 1, radius: .8 + Math.random() * 2.2, hue: 190 + Math.random() * 100});
+          }
+        }
+        lastBass = lastBass * .68 + bass * .32;
+        sparks = sparks.filter(spark => spark.life > 0);
+        for (const spark of sparks) {
+          spark.x += spark.vx; spark.y += spark.vy; spark.vy *= .99; spark.life -= .028;
+          painter.fillStyle = `hsla(${spark.hue}, 100%, 78%, ${spark.life})`;
+          painter.shadowColor = `hsl(${spark.hue}, 100%, 65%)`;
+          painter.shadowBlur = 12;
+          painter.beginPath(); painter.arc(spark.x, spark.y, spark.radius, 0, Math.PI * 2); painter.fill();
+        }
+        painter.shadowBlur = 0;
+      }
+    }
+
+    function animateVisualizer(timestamp) {
+      if (!wanted || document.hidden || !analyser || context?.state !== 'running') { animationId = 0; return; }
+      const interval = reducedMotion.matches ? 55 : 33;
+      if (timestamp - lastDraw >= interval) { lastDraw = timestamp; drawVisualizer(true); }
+      animationId = requestAnimationFrame(animateVisualizer);
+    }
+
+    function startVisualizer() {
+      if (animationId || !wanted || document.hidden) return;
+      vizMode.textContent = t('player.live');
+      lastDraw = 0;
+      animationId = requestAnimationFrame(animateVisualizer);
+    }
+
+    function pauseVisualizer() {
+      if (animationId) cancelAnimationFrame(animationId);
+      animationId = 0;
+      vizMode.textContent = t('player.standby');
+      levels.fill(0);
+      sparks = [];
+      lastBass = 0;
+      drawVisualizer(false);
+    }
+
+    window.addEventListener('resize', resizeVisualizer);
+    resizeVisualizer();
+
+    let currentMessage = {label: 'player.idle', info: 'player.first', kind: '', values: {}};
+    function show(label, info, kind = '', values = {}) {
+      currentMessage = {label, info, kind, values};
+      state.textContent = t(label);
+      detail.textContent = t(info, label === 'player.captureFailed' ? {...values, value: I18n.errorText(values.value)} : values);
+      dot.className = 'dot ' + kind;
+    }
+
+    function connect() {
+      if (!wanted) return;
+      clearTimeout(retryTimer);
+      if (socket && socket.readyState < WebSocket.CLOSING) return;
+      show('player.connecting', 'player.connectingInfo');
+      const connection = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/stream');
+      socket = connection;
+      connection.binaryType = 'arraybuffer';
+      connection.onopen = () => show('player.connected', 'player.waiting');
+      connection.onmessage = (event) => {
+        if (typeof event.data === 'string') {
+          const message = JSON.parse(event.data);
+          if (message.error) { received = false; show('player.captureFailed', 'raw', 'error', {value: message.error}); pauseVisualizer(); }
+          else if (!received) show('player.connected', message.device ? 'player.source' : 'player.finding', '', {device: message.device});
+          return;
+        }
+        lastPacketAt = Date.now();
+        playPacket(event.data);
+      };
+      connection.onclose = () => {
+        if (socket !== connection) return;
+        socket = null;
+        received = false;
+        nextTime = 0;
+        lastPacketAt = 0;
+        pauseVisualizer();
+        if (wanted) {
+          show('player.disconnected', 'player.retry', 'error');
+          retryTimer = setTimeout(connect, 2000);
+        }
+      };
+      connection.onerror = () => { /* onclose handles retry */ };
+    }
+
+    function reconnectNow() {
+      const previous = socket;
+      socket = null;
+      if (previous) previous.close();
+      received = false;
+      nextTime = 0;
+      lastPacketAt = 0;
+      pauseVisualizer();
+      connect();
+    }
+
+    function playPacket(bytes) {
+      if (!context || context.state !== 'running') return;
+      const pcm = new Int16Array(bytes);
+      const frames = Math.floor(pcm.length / 2);
+      if (!frames) return;
+      const buffer = context.createBuffer(2, frames, 48000);
+      const left = buffer.getChannelData(0), right = buffer.getChannelData(1);
+      for (let i = 0; i < frames; i++) {
+        left[i] = pcm[i * 2] / 32768;
+        right[i] = pcm[i * 2 + 1] / 32768;
+      }
+      const now = context.currentTime;
+      if (nextTime < now || nextTime > now + 0.5) nextTime = now + 0.12;
+      const source = context.createBufferSource();
+      source.buffer = buffer;
+      source.connect(gain);
+      source.start(nextTime);
+      nextTime += buffer.duration;
+      if (!received) { received = true; show('player.playing', 'player.receiving', 'playing'); startVisualizer(); }
+    }
+
+    toggle.addEventListener('click', async () => {
+      if (wanted) {
+        wanted = false;
+        clearTimeout(retryTimer);
+        pauseVisualizer();
+        if (socket) socket.close();
+        socket = null;
+        if (context) await context.close();
+        context = null;
+        gain = null;
+        analyser = null;
+        frequencies = null;
+        nextTime = 0;
+        received = false;
+        lastPacketAt = 0;
+        toggle.textContent = t('player.start');
+        show('player.stopped', 'player.restart');
+        return;
+      }
+      toggle.disabled = true;
+      try {
+        if ('audioSession' in navigator) {
+          try { navigator.audioSession.type = 'playback'; } catch (error) { /* Older browsers keep the current mode. */ }
+        }
+        context ||= new (window.AudioContext || window.webkitAudioContext)();
+        gain ||= context.createGain();
+        gain.gain.value = Number(volume.value) / 100;
+        analyser = context.createAnalyser();
+        analyser.fftSize = 2048;
+        analyser.smoothingTimeConstant = .75;
+        frequencies = new Uint8Array(analyser.frequencyBinCount);
+        gain.connect(analyser);
+        analyser.connect(context.destination);
+        await context.resume();
+        wanted = true;
+        toggle.textContent = t('player.stop');
+        connect();
+      } catch (error) {
+        show('player.failed', 'raw', 'error', {value: String(error)});
+      } finally {
+        toggle.disabled = false;
+      }
+    });
+    volume.addEventListener('input', () => {
+      volumeText.textContent = volume.value + '%';
+      if (gain) gain.gain.value = Number(volume.value) / 100;
+    });
+    document.addEventListener('visibilitychange', async () => {
+      if (document.hidden) { pauseVisualizer(); return; }
+      if (!wanted || !context) return;
+      if (context.state !== 'running') {
+        try { await context.resume(); } catch (error) { /* User action may be required. */ }
+      }
+      if (!wanted) return;
+      if (context.state !== 'running') {
+        show('player.paused', 'player.resume', 'error');
+        return;
+      }
+      if (!socket || socket.readyState >= WebSocket.CLOSING || Date.now() - lastPacketAt > 4000) {
+        reconnectNow();
+      } else if (received) startVisualizer();
+    });
+    window.addEventListener('languagechange', () => {
+      show(currentMessage.label, currentMessage.info, currentMessage.kind, currentMessage.values);
+      toggle.textContent = t(wanted ? 'player.stop' : 'player.start');
+      vizMode.textContent = t(animationId ? 'player.live' : 'player.standby');
+    });
+  </script>
+</body>
+</html>

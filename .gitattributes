@@ -1,0 +1,15 @@
+# Consistent source text, with Windows line endings for launch scripts.
+* text=auto
+*.py text eol=lf
+*.js text eol=lf
+*.cjs text eol=lf
+*.html text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.bat text eol=crlf
+
+# Keep development files in Git, but omit them from GitHub Download ZIP.
+/tests export-ignore
+/.github export-ignore
+/.gitattributes export-ignore
+/.gitignore export-ignore
