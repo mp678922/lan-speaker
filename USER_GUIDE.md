@@ -8,7 +8,7 @@ LAN Speaker copies a Windows computer's default audio output to browsers on othe
 
 Double-click `start.bat` in Windows File Explorer. Keep its window open, then use the setup guide's current address on the receiving device. Click **Start playback**. Close the BAT window or press Ctrl+C there when finished.
 
-English is the first-run default. The language menu switches the player, setup guide, live status, and ChatGPT prompts between English and Traditional Chinese. The browser remembers your selection. For console language, use `start.bat --lang en` or `start.bat --lang zh`. A port override can be combined with it, such as `start.bat 38471 --lang zh`.
+Without a previous manual choice, the pages use Traditional Chinese for a Chinese primary browser language, otherwise English. A URL language overrides a saved manual choice, which overrides automatic detection. The language menu switches the player, setup guide, live status, and ChatGPT prompts, and remembers your choice. Automatic detection is not saved or passed to other devices. For console language, use `start.bat --lang en` or `start.bat --lang zh`. A port override can be combined with it, such as `start.bat 38471 --lang zh`.
 
 ## Before the website opens
 

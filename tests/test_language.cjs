@@ -13,7 +13,8 @@ const report = {
       protocol: 'TCP', localPort: '38471', remoteAddress: 'LocalSubnet'}}
 };
 
-function browser(page, {query = '', storage = new Map(), blockedStorage = false} = {}) {
+function browser(page, {query = '', storage = new Map(), blockedStorage = false,
+  languages = ['en-US'], language = 'en-US'} = {}) {
   const html = fs.readFileSync(path.join(root, 'web', `${page}.html`), 'utf8');
   const nodes = [], ids = new Map(), events = {}, sockets = [];
   const painter = new Proxy({}, {get: (_, name) => name === 'createRadialGradient' ?
@@ -69,7 +70,7 @@ function browser(page, {query = '', storage = new Map(), blockedStorage = false}
     localStorage: {getItem(key) {if (blockedStorage) throw Error('denied'); return storage.get(key) || null;},
       setItem(key, value) {if (blockedStorage) throw Error('denied'); storage.set(key, value);}},
     history: {replaceState(_, __, value) {location.href = value.toString();}},
-    navigator: {clipboard: {writeText: async () => {}}},
+    navigator: {languages, language, clipboard: {writeText: async () => {}}},
     fetch: async path => ({ok: true, json: async () => path === '/guide-data' ? {port: report.port, urls: report.urls} :
       path === '/health' ? {device: report.audioDevice, error: ''} : report}),
     addEventListener(name, fn) {(events[name] ||= []).push(fn);},
@@ -93,7 +94,9 @@ function browser(page, {query = '', storage = new Map(), blockedStorage = false}
   assert.equal(guide.document.documentElement.lang, 'en');
   assert.match(guide.document.title, /Device setup/);
   assert.match(guide.ids.get('status').textContent, /Ready: Speakers/);
-  assert.match(guide.ids.get('receiverUrl').href, /lang=en/);
+  assert(!new URL(guide.ids.get('receiverUrl').href).searchParams.has('lang'));
+  assert.equal(guide.context.I18n.hasExplicitLanguage, false);
+  assert(!guide.storage.has('lan-speaker.language'));
   assert(!Object.hasOwn(guide.ids.get('troubleshooting').attrs, 'open'));
   for (const language of ['zh', 'en']) {
     guide.context.I18n.setLanguage(language);
@@ -111,6 +114,28 @@ function browser(page, {query = '', storage = new Map(), blockedStorage = false}
   assert.equal(browser('guide', {storage: guide.storage}).context.I18n.language, 'zh');
   assert.equal(browser('guide', {storage: guide.storage, query: '?lang=en'}).context.I18n.language, 'en');
   assert.equal(browser('guide', {blockedStorage: true}).context.I18n.language, 'en');
+  for (const locale of ['zh', 'zh-TW', 'zh-CN', 'zh-Hant', 'zh-HK', 'ZH_tw']) {
+    const automatic = browser('guide', {languages: [locale, 'en-US']});
+    await new Promise(setImmediate);
+    assert.equal(automatic.context.I18n.language, 'zh', locale);
+    assert.equal(automatic.document.documentElement.lang, 'zh-Hant');
+    assert.match(automatic.ids.get('status').textContent, /準備就緒/);
+    assert(!automatic.storage.has('lan-speaker.language'), 'Automatic detection must not create a saved selection');
+    assert(!new URL(automatic.ids.get('receiverUrl').href).searchParams.has('lang'), 'Auto-detected guide must not force receiver language');
+    assert.equal(browser('index', {storage: automatic.storage, languages: ['en-US']}).context.I18n.language, 'en');
+  }
+  assert.equal(browser('guide', {languages: ['en-US', 'zh-TW']}).context.I18n.language, 'en');
+  assert.equal(browser('index', {languages: [], language: 'zh-TW'}).context.I18n.language, 'zh');
+  assert.equal(browser('index', {languages: null, language: ''}).context.I18n.language, 'en');
+  assert.equal(browser('index', {languages: ['fr-FR']}).context.I18n.language, 'en');
+  assert.equal(browser('guide', {blockedStorage: true, languages: ['zh-TW']}).context.I18n.language, 'zh');
+  const manualEnglish = browser('guide', {storage: new Map([['lan-speaker.language', 'en']]), languages: ['zh-TW']});
+  await new Promise(setImmediate);
+  assert.equal(manualEnglish.context.I18n.language, 'en');
+  assert.equal(manualEnglish.context.I18n.hasExplicitLanguage, true);
+  assert.match(manualEnglish.ids.get('receiverUrl').href, /lang=en/);
+  assert.equal(browser('index', {query: '?lang=en', languages: ['zh-TW'], storage: new Map([['lan-speaker.language', 'zh']])}).context.I18n.language, 'en');
+  assert.equal(browser('index', {query: '?lang=invalid', languages: ['zh-TW'], storage: new Map([['lan-speaker.language', 'invalid']])}).context.I18n.language, 'zh');
   const player = browser('index');
   assert.equal(player.ids.get('toggle').textContent, 'Start playback');
   await player.ids.get('toggle').fire('click');
@@ -131,5 +156,5 @@ function browser(page, {query = '', storage = new Map(), blockedStorage = false}
   assert.equal(player.ids.get('detail').textContent, 'No default Windows output device found');
   await player.ids.get('toggle').fire('click');
   assert.equal(player.ids.get('state').textContent, 'Stopped');
-  console.log('PASS: English default, saved/query language, bilingual prompts and status, and switching language during playback.');
+  console.log('PASS: browser locale detection, explicit/saved priority, automatic receiver independence, bilingual prompts and status, and switching language during playback.');
 })().catch(error => {console.error(error); process.exitCode = 1;});

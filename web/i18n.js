@@ -1,4 +1,4 @@
-/* Shared UI and support-prompt translations. English is the first-run default. */
+/* Shared UI and support-prompt translations, with first-use browser locale detection. */
 (() => {
   const messages = {
     'app.title': ['LAN Speaker', '區網喇叭'],
@@ -106,7 +106,14 @@
   let saved;
   try { saved = localStorage.getItem(storageKey); } catch (_) {}
   const requested = new URL(location.href).searchParams.get('lang');
-  let language = ['en', 'zh'].includes(requested) ? requested : ['en', 'zh'].includes(saved) ? saved : 'en';
+  const validLanguage = value => ['en', 'zh'].includes(value);
+  function browserLanguage() {
+    const preferences = Array.isArray(navigator.languages) ? navigator.languages : [];
+    const preferred = preferences.find(value => typeof value === 'string' && value.trim()) || navigator.language || '';
+    return /^zh(?:[-_]|$)/i.test(preferred.trim()) ? 'zh' : 'en';
+  }
+  let hasExplicitLanguage = validLanguage(requested) || validLanguage(saved);
+  let language = validLanguage(requested) ? requested : validLanguage(saved) ? saved : browserLanguage();
   function t(key, values = {}) {
     const entry = messages[key];
     if (!entry) throw new Error(`Missing translation: ${key}`);
@@ -127,6 +134,7 @@
   function setLanguage(value) {
     if (!['en', 'zh'].includes(value)) return;
     language = value;
+    hasExplicitLanguage = true;
     try { localStorage.setItem(storageKey, language); } catch (_) {}
     try { const url = new URL(location.href); url.searchParams.set('lang', language); history.replaceState(null, '', url); } catch (_) {}
     apply();
@@ -137,7 +145,8 @@
     if (value.startsWith('No loopback capture for ')) return t('audio.noLoopback', {device: value.slice(24)});
     return value;
   }
-  window.I18n = {t, errorText, setLanguage, get language() { return language; }};
+  window.I18n = {t, errorText, setLanguage, get language() { return language; },
+    get hasExplicitLanguage() { return hasExplicitLanguage; }};
   document.querySelectorAll('[data-language-select]').forEach(node => node.addEventListener('change', () => setLanguage(node.value)));
   if (requested === 'en' || requested === 'zh') { try { localStorage.setItem(storageKey, language); } catch (_) {} }
   apply();

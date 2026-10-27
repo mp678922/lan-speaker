@@ -29,7 +29,7 @@ Source ZIP downloads omit development tests and Git configuration through `.gita
 3. Connect the receiving device to a local network that can reach the computer. Open the address shown in the guide using a browser that supports Web Audio and WebSocket.
 4. Click **Start playback** and adjust the device and page volume. Keep the page open. Close the BAT window or press Ctrl+C there to stop the server.
 
-The player and setup guide start in **English** on a fresh browser. Select **繁體中文** in the language menu to switch; the browser remembers your choice. Player links from the guide include the selected language. Troubleshooting prompts sent to ChatGPT use that language too.
+On first use, the player and setup guide follow the browser's primary preferred language: Chinese locales use **Traditional Chinese**, and other or unavailable locales use **English**. A language explicitly set in the URL takes priority, followed by a saved manual choice. The language menu remembers your choice. Auto-detected choices are not saved or forced onto receiving devices; each device can detect its own language. Manually selected languages are included in shared player links. ChatGPT troubleshooting prompts follow the current page language.
 
 The BAT console also defaults to English. To explicitly launch the console and guide in Chinese, run `start.bat --lang zh`; use `start.bat --lang en` for English. You can combine language and port options: `start.bat 38471 --lang zh`.
 

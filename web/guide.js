@@ -12,7 +12,8 @@ let diagnosticStatusKey = 'diag.loading', copyKey = 'guide.copy';
 
 function languageUrl(value) {
   const url = new URL(value);
-  url.searchParams.set('lang', I18n.language);
+  if (I18n.hasExplicitLanguage) url.searchParams.set('lang', I18n.language);
+  else url.searchParams.delete('lang');
   return url.toString();
 }
 

@@ -27,6 +27,6 @@ The **Windows computer is the server**. It copies its current default audio outp
 3. Enter the guide's current player address on the receiving device, including `http://`, the computer IP, and the port. Use your own address rather than another person's example IP.
 4. Click **Start playback**. Stop the server by closing the BAT window or pressing Ctrl+C there.
 
-The pages default to English for a fresh browser. Use the language menu for Traditional Chinese; the browser remembers the selection. To explicitly start the console and guide in Chinese, run `start.bat --lang zh`.
+On first use, the pages detect the browser's primary preferred language: Chinese locales use Traditional Chinese, otherwise English. A URL language or saved manual choice takes priority. Automatic detection is not saved, so each receiving device can detect its own language. Use the language menu to save a choice. To explicitly start the console and guide in Chinese, run `start.bat --lang zh`.
 
 If something fails, follow [User guide and troubleshooting](USER_GUIDE.md).

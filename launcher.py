@@ -61,7 +61,7 @@ def main() -> int:
     global GUIDE_LANGUAGE
     parser = argparse.ArgumentParser(description="LAN Speaker launcher")
     parser.add_argument("port", nargs="?", help="Override the TCP port in config.json")
-    parser.add_argument("--lang", choices=("en", "zh"), help="Console and guide language (default: en; guide remembers your selection)")
+    parser.add_argument("--lang", choices=("en", "zh"), help="Override console and guide language (console defaults to en; guide remembers or detects browser language)")
     args = parser.parse_args()
     GUIDE_LANGUAGE = args.lang
     lang.set_language(args.lang or "en")
@@ -96,6 +96,10 @@ def main() -> int:
     env = os.environ.copy()
     env["LAN_SPEAKER_PORT"] = str(port)
     env["LAN_SPEAKER_LANGUAGE"] = lang.LANGUAGE
+    if GUIDE_LANGUAGE:
+        env["LAN_SPEAKER_GUIDE_LANGUAGE"] = GUIDE_LANGUAGE
+    else:
+        env.pop("LAN_SPEAKER_GUIDE_LANGUAGE", None)
     try:
         threading.Thread(target=open_guide_when_ready, args=(port,), daemon=True).start()
         return subprocess.call([str(python), str(ROOT / "server.py")], cwd=ROOT, env=env)

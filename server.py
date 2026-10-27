@@ -217,8 +217,10 @@ async def startup(app):
     app["capture_thread"] = thread
     thread.start()
     print("\n" + lang.message("running"), flush=True)
+    requested_language = os.environ.get("LAN_SPEAKER_GUIDE_LANGUAGE")
+    language_query = f"?lang={requested_language}" if requested_language in {"en", "zh"} else ""
     for address in lan_addresses():
-        print(f"  http://{address}:{app['port']}/?lang={lang.LANGUAGE}", flush=True)
+        print(f"  http://{address}:{app['port']}/{language_query}", flush=True)
     print(f"  PC: http://127.0.0.1:{app['port']}/", flush=True)
     print(lang.message("stop") + "\n", flush=True)
 
